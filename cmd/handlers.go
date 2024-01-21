@@ -188,8 +188,8 @@ func initHTTPHandlers(e *echo.Echo, app *App) {
 	e.POST("/subscription/form", handleSubscriptionForm)
 	e.GET("/subscription/:campUUID/:subUUID", noIndex(validateUUID(subscriberExists(handleSubscriptionPage),
 		"campUUID", "subUUID")))
-	e.POST("/subscription/:campUUID/:subUUID", validateUUID(subscriberExists(handleSubscriptionPrefs),
-		"campUUID", "subUUID"))
+	e.POST("/subscription/:listOrCampUUID/:subUUID", validateUUID(subscriberExists(handleSubscriptionPrefs),
+		"listOrCampUUID", "subUUID"))
 	e.GET("/subscription/optin/:subUUID", noIndex(validateUUID(subscriberExists(handleOptinPage), "subUUID")))
 	e.POST("/subscription/optin/:subUUID", validateUUID(subscriberExists(handleOptinPage), "subUUID"))
 	e.POST("/subscription/export/:subUUID", validateUUID(subscriberExists(handleSelfExportSubscriberData),

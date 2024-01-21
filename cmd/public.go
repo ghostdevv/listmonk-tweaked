@@ -244,9 +244,9 @@ func handleSubscriptionPage(c echo.Context) error {
 // campaigns link to.
 func handleSubscriptionPrefs(c echo.Context) error {
 	var (
-		app      = c.Get("app").(*App)
-		campUUID = c.Param("campUUID")
-		subUUID  = c.Param("subUUID")
+		app            = c.Get("app").(*App)
+		listOrCampUUID = c.Param("listOrCampUUID")
+		subUUID        = c.Param("subUUID")
 
 		req struct {
 			Name      string   `form:"name" json:"name"`
@@ -265,9 +265,33 @@ func handleSubscriptionPrefs(c echo.Context) error {
 	// Simple unsubscribe.
 	blocklist := app.constants.Privacy.AllowBlocklist && req.Blocklist
 	if !req.Manage || blocklist {
-		if err := app.core.UnsubscribeByCampaign(subUUID, campUUID, blocklist); err != nil {
+		//* Try and find the list by UUID
+		list, err := app.core.GetList(0, listOrCampUUID)
+
+		if err != nil && !strings.Contains(err.Error(), "code=400") {
 			return c.Render(http.StatusInternalServerError, tplMessage,
 				makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+		}
+
+		if len(list.UUID) > 0 {
+			//* Handle the case where it's a listUUID instead of campUUID
+			subscriber, err := app.core.GetSubscriber(0, subUUID, "")
+
+			if err != nil {
+				return c.Render(http.StatusInternalServerError, tplMessage,
+					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+			}
+
+			if err := app.core.AddSubscriptions([]int{subscriber.ID}, []int{list.ID}, "unsubscribed"); err != nil {
+				return c.Render(http.StatusInternalServerError, tplMessage,
+					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+			}
+		} else {
+			//* Handle the case where it's a campUUID
+			if err := app.core.UnsubscribeByCampaign(subUUID, listOrCampUUID, blocklist); err != nil {
+				return c.Render(http.StatusInternalServerError, tplMessage,
+					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+			}
 		}
 
 		return c.Render(http.StatusOK, tplMessage,
