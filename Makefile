@@ -6,13 +6,13 @@ VERSION := $(or $(LISTMONK_VERSION),$(shell git describe --tags --abbrev=0 2> /d
 
 BUILDSTR := ${VERSION} (\#${LAST_COMMIT} $(shell date -u +"%Y-%m-%dT%H:%M:%S%z"))
 
-YARN ?= yarn
+PNPM ?= pnpm
 GOPATH ?= $(HOME)/go
 STUFFBIN ?= $(GOPATH)/bin/stuffbin
-FRONTEND_YARN_MODULES = frontend/node_modules
+FRONTEND_NODE_MODULES = frontend/node_modules
 FRONTEND_DIST = frontend/dist
 FRONTEND_DEPS = \
-	$(FRONTEND_YARN_MODULES) \
+	$(FRONTEND_NODE_MODULES) \
 	frontend/index.html \
 	frontend/package.json \
 	frontend/vite.config.js \
@@ -33,9 +33,9 @@ build: $(BIN)
 $(STUFFBIN):
 	go install github.com/knadh/stuffbin/...
 
-$(FRONTEND_YARN_MODULES): frontend/package.json frontend/yarn.lock
-	cd frontend && $(YARN) install
-	touch -c $(FRONTEND_YARN_MODULES)
+$(FRONTEND_NODE_MODULES): frontend/package.json frontend/pnpm-lock.yaml
+	cd frontend && $(PNPM) install
+	touch -c $(FRONTEND_NODE_MODULES)
 
 # Build the backend to ./listmonk.
 $(BIN): $(shell find . -type f -name "*.go")
@@ -48,7 +48,7 @@ run:
 
 # Build the JS frontend into frontend/dist.
 $(FRONTEND_DIST): $(FRONTEND_DEPS)
-	export VUE_APP_VERSION="${VERSION}" && cd frontend && $(YARN) build
+	export VUE_APP_VERSION="${VERSION}" && cd frontend && $(PNPM) build
 	touch -c $(FRONTEND_DIST)
 
 
@@ -58,7 +58,7 @@ build-frontend: $(FRONTEND_DIST)
 # Run the JS frontend server in dev mode.
 .PHONY: run-frontend
 run-frontend:
-	export VUE_APP_VERSION="${VERSION}" && cd frontend && $(YARN) dev
+	export VUE_APP_VERSION="${VERSION}" && cd frontend && $(PNPM) dev
 
 # Run Go tests.
 .PHONY: test
