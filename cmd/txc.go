@@ -68,10 +68,42 @@ func handleSendTxcMessage(c echo.Context) error {
 
 	//* Build Message
 
+	//? Find the default capaign template
+	templates, err := app.core.GetTemplates(models.TemplateTypeCampaign, false)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, app.i18n.Ts("globals.messages.internalError"))
+	}
+
+	var defaultTemplate models.Template
+
+	for _, template := range templates {
+		if template.IsDefault {
+			defaultTemplate = template
+			break
+		}
+	}
+
+	txcRenderData := models.TxcRenderData{
+		Subscriber: models.Subscriber{
+			Email:   sub.Email,
+			Name:    sub.Name,
+			UUID:    sub.UUID,
+			Attribs: sub.Attribs,
+		},
+		Campaign: models.TxcRenderDataCampaign{
+			UUID: list.UUID,
+			// todo pub & priv list?
+			Name:      list.Name,
+			Subject:   tpl.Subject,
+			FromEmail: app.constants.FromEmail,
+		},
+	}
+
 	//? Render message template
-	if err := m.Render(sub, tpl); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			app.i18n.Ts("globals.messages.errorFetching", "name"))
+	if err := m.Render(&defaultTemplate, tpl, app.manager.GenericTemplateFuncs(), txcRenderData); err != nil {
+		app.log.Printf("error rendering template (%s): %v", tpl.Subject, err)
+		return err
 	}
 
 	//? Prepare the final message.
@@ -86,7 +118,8 @@ func handleSendTxcMessage(c echo.Context) error {
 
 	msg.Headers = make(textproto.MIMEHeader, 2)
 	msg.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click")
-	msg.Headers.Add("List-Unsubscribe", fmt.Sprintf("<%s/subscription/%s/%s>", app.constants.RootURL, list.UUID, sub.UUID))
+	// msg.Headers.Add("List-Unsubscribe", fmt.Sprintf("<%s/subscription/%s/%s>", app.constants.RootURL, list.UUID, sub.UUID))
+	msg.Headers.Add("List-Unsubscribe", fmt.Sprintf(app.constants.UnsubURL, list.UUID, sub.UUID))
 
 	//? Send Message
 	if err := app.manager.PushMessage(msg); err != nil {

@@ -123,6 +123,17 @@ var regTplFuncs = []regTplFunc{
 	},
 }
 
+var txcRegexFuncs = append(regTplFuncs,
+	regTplFunc{
+		regExp:  regexp.MustCompile(`{{ UnsubscribeURL . }}`),
+		replace: `UNSUBURL`,
+	},
+	regTplFunc{
+		regExp:  regexp.MustCompile(`{{ (TrackView|ManageURL|OptinURL|MessageURL) . }}`),
+		replace: ``,
+	},
+)
+
 // AdminNotifCallback is a callback function that's called
 // when a campaign's status changes.
 type AdminNotifCallback func(subject string, data interface{}) error
@@ -677,31 +688,59 @@ func (m *TxMessage) Render(sub Subscriber, tpl *Template) error {
 	return nil
 }
 
-func (m *TxcMessage) Render(sub Subscriber, tpl *Template) error {
-	data := struct {
-		Subscriber Subscriber
-		Txc        *TxcMessage
-	}{sub, m}
+type TxcRenderDataCampaign struct {
+	UUID      string
+	Name      string
+	Subject   string
+	FromEmail string
+}
 
-	// Render the body.
+type TxcRenderData struct {
+	Campaign   TxcRenderDataCampaign
+	Subscriber Subscriber
+}
+
+func (m *TxcMessage) Render(campTpl *Template, msgTpl *Template, funcMap template.FuncMap, data TxcRenderData) error {
+	// todo potentially: subject templates, markdown body
+
+	//? Pass the campTpl Body through the regex replacements
+	campTplBody := campTpl.Body
+	for _, r := range txcRegexFuncs {
+		campTplBody = r.regExp.ReplaceAllString(campTplBody, r.replace)
+	}
+
+	//? Create a new template from campTplBody
+	baseTPL, err := template.New(BaseTpl).Funcs(funcMap).Parse(campTplBody)
+	if err != nil {
+		return fmt.Errorf("error compiling base template: %v", err)
+	}
+
+	//? Pass the msgTpl body through the regex replacements
+	msgTplBody := msgTpl.Body
+	for _, r := range txcRegexFuncs {
+		msgTplBody = r.regExp.ReplaceAllString(msgTplBody, r.replace)
+	}
+
+	//? Create a new template from msgTplBody
+	contentTpl, err := template.New(ContentTpl).Funcs(funcMap).Parse(msgTplBody)
+	if err != nil {
+		return fmt.Errorf("error compiling message: %v", err)
+	}
+
+	//? Merge the baseTpl and contentTpl
+	finalTpl, err := baseTPL.AddParseTree(ContentTpl, contentTpl.Tree)
+	if err != nil {
+		return fmt.Errorf("error inserting child template: %v", err)
+	}
+
+	//? Render the finalTpl
 	b := bytes.Buffer{}
-	if err := tpl.Tpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
+	if err := finalTpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
 		return err
 	}
 	m.Body = make([]byte, b.Len())
 	copy(m.Body, b.Bytes())
 	b.Reset()
-
-	// If the subject is also a template, render that.
-	if tpl.SubjectTpl != nil {
-		if err := tpl.SubjectTpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
-			return err
-		}
-		m.Subject = b.String()
-		b.Reset()
-	} else {
-		m.Subject = tpl.Subject
-	}
 
 	return nil
 }
