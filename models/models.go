@@ -701,7 +701,7 @@ type TxcRenderData struct {
 }
 
 func (m *TxcMessage) Render(campTpl *Template, msgTpl *Template, funcMap template.FuncMap, data TxcRenderData) error {
-	// todo potentially: subject templates, markdown body
+	// todo potentially: subject templates
 
 	//? Pass the campTpl Body through the regex replacements
 	campTplBody := campTpl.Body
@@ -715,11 +715,19 @@ func (m *TxcMessage) Render(campTpl *Template, msgTpl *Template, funcMap templat
 		return fmt.Errorf("error compiling base template: %v", err)
 	}
 
-	//? Pass the msgTpl body through the regex replacements
+	//? Parse the msgTpl body
+
 	msgTplBody := msgTpl.Body
+
 	for _, r := range txcRegexFuncs {
 		msgTplBody = r.regExp.ReplaceAllString(msgTplBody, r.replace)
 	}
+
+	var mdb bytes.Buffer
+	if err := markdown.Convert([]byte(msgTplBody), &mdb); err != nil {
+		return err
+	}
+	msgTplBody = mdb.String()
 
 	//? Create a new template from msgTplBody
 	contentTpl, err := template.New(ContentTpl).Funcs(funcMap).Parse(msgTplBody)
@@ -734,13 +742,13 @@ func (m *TxcMessage) Render(campTpl *Template, msgTpl *Template, funcMap templat
 	}
 
 	//? Render the finalTpl
-	b := bytes.Buffer{}
-	if err := finalTpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
+	rb := bytes.Buffer{}
+	if err := finalTpl.ExecuteTemplate(&rb, BaseTpl, data); err != nil {
 		return err
 	}
-	m.Body = make([]byte, b.Len())
-	copy(m.Body, b.Bytes())
-	b.Reset()
+	m.Body = make([]byte, rb.Len())
+	copy(m.Body, rb.Bytes())
+	rb.Reset()
 
 	return nil
 }
