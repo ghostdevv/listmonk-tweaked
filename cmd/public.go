@@ -64,6 +64,7 @@ type unsubTpl struct {
 	AllowWipe        bool
 	AllowPreferences bool
 	ShowManage       bool
+	ListTitle        string
 }
 
 type optinTpl struct {
@@ -191,10 +192,11 @@ func handleViewCampaignMessage(c echo.Context) error {
 // campaigns link to.
 func handleSubscriptionPage(c echo.Context) error {
 	var (
-		app           = c.Get("app").(*App)
-		subUUID       = c.Param("subUUID")
-		showManage, _ = strconv.ParseBool(c.FormValue("manage"))
-		out           = unsubTpl{}
+		app            = c.Get("app").(*App)
+		subUUID        = c.Param("subUUID")
+		listOrCampUUID = c.Param("listOrCampUUID")
+		showManage, _  = strconv.ParseBool(c.FormValue("manage"))
+		out            = unsubTpl{}
 	)
 	out.SubUUID = subUUID
 	out.Title = app.i18n.T("public.unsubscribeTitle")
@@ -202,6 +204,7 @@ func handleSubscriptionPage(c echo.Context) error {
 	out.AllowExport = app.constants.Privacy.AllowExport
 	out.AllowWipe = app.constants.Privacy.AllowWipe
 	out.AllowPreferences = app.constants.Privacy.AllowPreferences
+	out.ListTitle = "List"
 
 	s, err := app.core.GetSubscriber(0, subUUID, "")
 	if err != nil {
@@ -215,17 +218,18 @@ func handleSubscriptionPage(c echo.Context) error {
 			makeMsgTpl(app.i18n.T("public.noSubTitle"), "", app.i18n.Ts("public.blocklisted")))
 	}
 
+	subs, err := app.core.GetSubscriptions(0, subUUID, false)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, app.i18n.T("public.errorFetchingLists"))
+	}
+
 	// Only show preference management if it's enabled in settings.
 	if app.constants.Privacy.AllowPreferences {
 		out.ShowManage = showManage
 	}
+
 	if out.ShowManage {
 		// Get the subscriber's lists.
-		subs, err := app.core.GetSubscriptions(0, subUUID, false)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, app.i18n.T("public.errorFetchingLists"))
-		}
-
 		out.Subscriptions = make([]models.Subscription, 0, len(subs))
 		for _, s := range subs {
 			if s.Type == models.ListTypePrivate {
@@ -233,6 +237,52 @@ func handleSubscriptionPage(c echo.Context) error {
 			}
 
 			out.Subscriptions = append(out.Subscriptions, s)
+		}
+	} else {
+		//* Try to find the campaign
+		camp, err := app.core.GetCampaign(0, listOrCampUUID, "")
+
+		if err == nil {
+			//* If campaign is found, set the name
+
+			var lists []struct {
+				ID   int    `json:"id"`
+				Name string `json:"name"`
+			}
+
+			err := camp.Lists.Unmarshal(&lists)
+
+			if err != nil {
+				return c.Render(http.StatusInternalServerError, tplMessage,
+					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.Ts("public.errorProcessingRequest")))
+			}
+
+			var result strings.Builder
+			for _, list := range lists {
+				for _, sub := range subs {
+					fmt.Println("List:", list.ID, "Sub:", sub.ID)
+					if list.ID == sub.ID && sub.Type != models.ListTypePrivate {
+						result.WriteString(list.Name)
+						result.WriteString(", ")
+						break
+					}
+				}
+			}
+
+			finalListTitle := strings.TrimSuffix(result.String(), ", ")
+
+			if len(finalListTitle) > 0 {
+				out.ListTitle = finalListTitle
+			}
+		} else {
+			//* If no campaign found try and find the list
+			list, err := app.core.GetList(0, listOrCampUUID)
+
+			//* If list is found and it's public, set the name
+			if err == nil && list.Type == models.ListTypePublic {
+				fmt.Println("List:", list.Name)
+				out.ListTitle = list.Name
+			}
 		}
 	}
 

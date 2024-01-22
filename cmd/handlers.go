@@ -186,8 +186,8 @@ func initHTTPHandlers(e *echo.Echo, app *App) {
 	// Public subscriber facing views.
 	e.GET("/subscription/form", handleSubscriptionFormPage)
 	e.POST("/subscription/form", handleSubscriptionForm)
-	e.GET("/subscription/:campUUID/:subUUID", noIndex(validateUUID(subscriberExists(handleSubscriptionPage),
-		"campUUID", "subUUID")))
+	e.GET("/subscription/:listOrCampUUID/:subUUID", noIndex(validateUUID(subscriberExists(handleSubscriptionPage),
+		"listOrCampUUID", "subUUID")))
 	e.POST("/subscription/:listOrCampUUID/:subUUID", validateUUID(subscriberExists(handleSubscriptionPrefs),
 		"listOrCampUUID", "subUUID"))
 	e.GET("/subscription/optin/:subUUID", noIndex(validateUUID(subscriberExists(handleOptinPage), "subUUID")))
