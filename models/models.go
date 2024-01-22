@@ -409,6 +409,15 @@ type TxMessage struct {
 	SubjectTpl *txttpl.Template   `json:"-"`
 }
 
+type TxcMessage struct {
+	SubscriberID int `json:"subscriber_id"`
+	TemplateID   int `json:"template_id"`
+	ListID       int `json:"list_id"`
+
+	Subject string `json:"-"`
+	Body    []byte `json:"-"`
+}
+
 // markdown is a global instance of Markdown parser and renderer.
 var markdown = goldmark.New(
 	goldmark.WithParserOptions(
@@ -643,6 +652,35 @@ func (m *TxMessage) Render(sub Subscriber, tpl *Template) error {
 	data := struct {
 		Subscriber Subscriber
 		Tx         *TxMessage
+	}{sub, m}
+
+	// Render the body.
+	b := bytes.Buffer{}
+	if err := tpl.Tpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
+		return err
+	}
+	m.Body = make([]byte, b.Len())
+	copy(m.Body, b.Bytes())
+	b.Reset()
+
+	// If the subject is also a template, render that.
+	if tpl.SubjectTpl != nil {
+		if err := tpl.SubjectTpl.ExecuteTemplate(&b, BaseTpl, data); err != nil {
+			return err
+		}
+		m.Subject = b.String()
+		b.Reset()
+	} else {
+		m.Subject = tpl.Subject
+	}
+
+	return nil
+}
+
+func (m *TxcMessage) Render(sub Subscriber, tpl *Template) error {
+	data := struct {
+		Subscriber Subscriber
+		Txc        *TxcMessage
 	}{sub, m}
 
 	// Render the body.
