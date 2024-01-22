@@ -51,9 +51,9 @@ jobs:
           docker version
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
-          args: release --parallelism 1 --clean --skip-validate
+          args: release --parallelism 1 --clean --skip=validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
