@@ -9,7 +9,7 @@ before:
     - make build-frontend
 
 builds:
-  - binary: listmonk
+  - binary: listmonk-tweaked
     main: ./cmd
     goos:
       - linux
@@ -43,7 +43,7 @@ dockers:
     goos: linux
     goarch: amd64
     ids:
-      - listmonk
+      - listmonk-tweaked
     image_templates:
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:latest-amd64"
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:{{ .Tag }}-amd64"
@@ -67,7 +67,7 @@ dockers:
     goos: linux
     goarch: arm64
     ids:
-      - listmonk
+      - listmonk-tweaked
     image_templates:
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:latest-arm64v8"
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:{{ .Tag }}-arm64v8"
@@ -92,7 +92,7 @@ dockers:
     goarch: arm
     goarm: 6
     ids:
-      - listmonk
+      - listmonk-tweaked
     image_templates:
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:latest-armv6"
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:{{ .Tag }}-armv6"
@@ -117,7 +117,7 @@ dockers:
     goarch: arm
     goarm: 7
     ids:
-      - listmonk
+      - listmonk-tweaked
     image_templates:
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:latest-armv7"
       # - "{{ .Env.DOCKER_ORG }}/{{ .ProjectName }}:{{ .Tag }}-armv7"
