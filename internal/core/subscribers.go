@@ -295,6 +295,10 @@ func (c *Core) InsertSubscriber(sub models.Subscriber, listIDs []int, listUUIDs 
 		hasOptin = num > 0
 	}
 
+	if err := c.h.SendNewSubscriberWebhook(sub.ID, listIDs); err != nil {
+		return models.Subscriber{}, false, err
+	}
+
 	return out, hasOptin, nil
 }
 
@@ -353,7 +357,35 @@ func (c *Core) UpdateSubscriberWithLists(id int, sub models.Subscriber, listIDs 
 		}
 	}
 
-	_, err := c.q.UpdateSubscriberWithLists.Exec(id,
+	//? Figure out the new lists
+
+	currentLists, err := c.GetSubscriberLists(id, "", []int{}, []string{}, "", "")
+	if err != nil {
+		return models.Subscriber{}, false, echo.NewHTTPError(http.StatusInternalServerError,
+			c.i18n.Ts("globals.messages.errorUpdating",
+				"name", "{globals.terms.subscriber}", "error", err.Error()))
+	}
+
+	newListIDs := []int{}
+
+	for _, newListID := range listIDs {
+		contains := true
+
+		for _, currentList := range currentLists {
+			if currentList.ID == newListID {
+				contains = false
+				break
+			}
+		}
+
+		if contains {
+			newListIDs = append(newListIDs, newListID)
+		}
+	}
+
+	//? Update user
+
+	_, err = c.q.UpdateSubscriberWithLists.Exec(id,
 		sub.Email,
 		strings.TrimSpace(sub.Name),
 		sub.Status,
@@ -373,11 +405,17 @@ func (c *Core) UpdateSubscriberWithLists(id int, sub models.Subscriber, listIDs 
 		return models.Subscriber{}, false, err
 	}
 
+	//? Hooks
+
 	hasOptin := false
 	if !preconfirm && c.constants.SendOptinConfirmation {
 		// Send a confirmation e-mail (if there are any double opt-in lists).
 		num, _ := c.h.SendOptinConfirmation(out, listIDs)
 		hasOptin = num > 0
+	}
+
+	if err := c.h.SendNewSubscriberWebhook(id, newListIDs); err != nil {
+		return models.Subscriber{}, false, err
 	}
 
 	return out, hasOptin, nil

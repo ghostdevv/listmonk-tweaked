@@ -82,6 +82,11 @@ type constants struct {
 	AdminUsername []byte `koanf:"admin_username"`
 	AdminPassword []byte `koanf:"admin_password"`
 
+	ListWebhooks []struct {
+		ListID int    `koanf:"list_id"`
+		URL    string `koanf:"url"`
+	} `koanf:"list_webhooks"`
+
 	Appearance struct {
 		AdminCSS  []byte `koanf:"admin.custom_css"`
 		AdminJS   []byte `koanf:"admin.custom_js"`
@@ -374,6 +379,9 @@ func initConstants() *constants {
 	var c constants
 	if err := ko.Unmarshal("app", &c); err != nil {
 		lo.Fatalf("error loading app config: %v", err)
+	}
+	if err := ko.Unmarshal("tweaks", &c); err != nil {
+		lo.Fatalf("error loading app.tweaks config: %v", err)
 	}
 	if err := ko.Unmarshal("privacy", &c.Privacy); err != nil {
 		lo.Fatalf("error loading app.privacy config: %v", err)

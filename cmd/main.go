@@ -203,7 +203,8 @@ func main() {
 	}
 
 	app.core = core.New(cOpt, &core.Hooks{
-		SendOptinConfirmation: sendOptinConfirmationHook(app),
+		SendOptinConfirmation:    sendOptinConfirmationHook(app),
+		SendNewSubscriberWebhook: sendNewSubscriberWebhook(app),
 	})
 
 	app.queries = queries

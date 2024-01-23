@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -590,6 +591,47 @@ func getQueryInts(param string, qp url.Values) ([]int, error) {
 	}
 
 	return out, nil
+}
+
+func sendNewSubscriberWebhook(app *App) func(subID int, listIDs []int) error {
+	return func(subID int, listIDs []int) error {
+		client := &http.Client{}
+
+		for _, listID := range listIDs {
+			for _, hook := range app.constants.ListWebhooks {
+				if hook.ListID == listID {
+					jsonData := map[string]interface{}{
+						"subscriberId": subID,
+						"listId":       hook.ListID,
+					}
+
+					// Convert the JSON data to a byte slice
+					jsonBytes, err := json.Marshal(jsonData)
+					if err != nil {
+						return err
+					}
+
+					// Create a request with a JSON body
+					req, err := http.NewRequest("POST", hook.URL, bytes.NewBuffer(jsonBytes))
+					if err != nil {
+						return err
+					}
+
+					req.Header.Set("Content-Type", "application/json")
+
+					resp, err := client.Do(req)
+					if err != nil {
+						return err
+					}
+					defer resp.Body.Close()
+
+					break
+				}
+			}
+		}
+
+		return nil
+	}
 }
 
 // sendOptinConfirmationHook returns an enclosed callback that sends optin confirmation e-mails.
