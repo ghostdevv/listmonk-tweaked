@@ -84,7 +84,10 @@ func handleSendTxcMessage(c echo.Context) error {
 		}
 	}
 
+	unsubscribeURL := fmt.Sprintf(app.constants.UnsubURL, list.UUID, sub.UUID)
+
 	txcRenderData := models.TxcRenderData{
+		UnsubscribeURL: unsubscribeURL,
 		Subscriber: models.Subscriber{
 			Email:   sub.Email,
 			Name:    sub.Name,
@@ -118,8 +121,7 @@ func handleSendTxcMessage(c echo.Context) error {
 
 	msg.Headers = make(textproto.MIMEHeader, 2)
 	msg.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click")
-	// msg.Headers.Add("List-Unsubscribe", fmt.Sprintf("<%s/subscription/%s/%s>", app.constants.RootURL, list.UUID, sub.UUID))
-	msg.Headers.Add("List-Unsubscribe", fmt.Sprintf(app.constants.UnsubURL, list.UUID, sub.UUID))
+	msg.Headers.Add("List-Unsubscribe", unsubscribeURL)
 
 	//? Send Message
 	if err := app.manager.PushMessage(msg); err != nil {

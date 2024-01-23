@@ -123,17 +123,6 @@ var regTplFuncs = []regTplFunc{
 	},
 }
 
-var txcRegexFuncs = append(regTplFuncs,
-	regTplFunc{
-		regExp:  regexp.MustCompile(`{{ UnsubscribeURL . }}`),
-		replace: `UNSUBURL`,
-	},
-	regTplFunc{
-		regExp:  regexp.MustCompile(`{{ (TrackView|ManageURL|OptinURL|MessageURL) . }}`),
-		replace: ``,
-	},
-)
-
 // AdminNotifCallback is a callback function that's called
 // when a campaign's status changes.
 type AdminNotifCallback func(subject string, data interface{}) error
@@ -696,12 +685,24 @@ type TxcRenderDataCampaign struct {
 }
 
 type TxcRenderData struct {
-	Campaign   TxcRenderDataCampaign
-	Subscriber Subscriber
+	UnsubscribeURL string
+	Campaign       TxcRenderDataCampaign
+	Subscriber     Subscriber
 }
 
 func (m *TxcMessage) Render(campTpl *Template, msgTpl *Template, funcMap template.FuncMap, data TxcRenderData) error {
 	// todo potentially: subject templates
+
+	var txcRegexFuncs = append(regTplFuncs,
+		regTplFunc{
+			regExp:  regexp.MustCompile(`{{ UnsubscribeURL . }}`),
+			replace: data.UnsubscribeURL,
+		},
+		regTplFunc{
+			regExp:  regexp.MustCompile(`{{ (TrackView|ManageURL|OptinURL|MessageURL) . }}`),
+			replace: ``,
+		},
+	)
 
 	//? Pass the campTpl Body through the regex replacements
 	campTplBody := campTpl.Body
