@@ -21,6 +21,17 @@ func handleSendTxcMessage(c echo.Context) error {
 		return err
 	}
 
+	//? Get Subscriber
+	sub, err := app.core.GetSubscriber(m.SubscriberID, "", "")
+	if err != nil {
+		return err
+	}
+
+	if sub.Status == models.SubscriberStatusBlockListed {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			app.i18n.Ts("globals.messages.errorCreating", "name", "email", "error", "subscriber is blocklisted"))
+	}
+
 	//? Get list
 	if m.ListID == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest,
@@ -28,12 +39,6 @@ func handleSendTxcMessage(c echo.Context) error {
 	}
 
 	list, err := app.core.GetList(m.ListID, "")
-	if err != nil {
-		return err
-	}
-
-	//? Get Subscriber
-	sub, err := app.core.GetSubscriber(m.SubscriberID, "", "")
 	if err != nil {
 		return err
 	}
