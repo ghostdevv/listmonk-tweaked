@@ -608,12 +608,14 @@ func sendNewSubscriberWebhook(app *App) func(subID int, listIDs []int) error {
 					// Convert the JSON data to a byte slice
 					jsonBytes, err := json.Marshal(jsonData)
 					if err != nil {
+						app.log.Printf("error marshalling subscriber webhook body: %v", err)
 						return err
 					}
 
 					// Create a request with a JSON body
 					req, err := http.NewRequest("POST", hook.URL, bytes.NewBuffer(jsonBytes))
 					if err != nil {
+						app.log.Printf("error creating webhook req: %v", err)
 						return err
 					}
 
@@ -621,6 +623,7 @@ func sendNewSubscriberWebhook(app *App) func(subID int, listIDs []int) error {
 
 					resp, err := client.Do(req)
 					if err != nil {
+						app.log.Printf("error sending webhook req: %v", err)
 						return err
 					}
 					defer resp.Body.Close()
