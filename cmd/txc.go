@@ -93,12 +93,7 @@ func handleSendTxcMessage(c echo.Context) error {
 
 	txcRenderData := models.TxcRenderData{
 		UnsubscribeURL: unsubscribeURL,
-		Subscriber: models.Subscriber{
-			Email:   sub.Email,
-			Name:    sub.Name,
-			UUID:    sub.UUID,
-			Attribs: sub.Attribs,
-		},
+		Subscriber:     sub,
 		Campaign: models.TxcRenderDataCampaign{
 			UUID: list.UUID,
 			// todo pub & priv list?
