@@ -332,9 +332,19 @@ func handleSubscriptionPrefs(c echo.Context) error {
 					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
 			}
 
-			if err := app.core.AddSubscriptions([]int{subscriber.ID}, []int{list.ID}, "unsubscribed"); err != nil {
+			lists, err := app.core.GetSubscriberLists(0, subUUID, []int{list.ID}, []string{list.UUID}, "", "")
+
+			if err != nil {
 				return c.Render(http.StatusInternalServerError, tplMessage,
 					makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+			}
+
+			//? Only run the un-subscription if the user is in the list and subscribed
+			if len(lists) == 1 && lists[0].SubscriptionStatus != models.SubscriptionStatusUnsubscribed {
+				if err := app.core.AddSubscriptions([]int{subscriber.ID}, []int{list.ID}, "unsubscribed"); err != nil {
+					return c.Render(http.StatusInternalServerError, tplMessage,
+						makeMsgTpl(app.i18n.T("public.errorTitle"), "", app.i18n.T("public.errorProcessingRequest")))
+				}
 			}
 		} else {
 			//* Handle the case where it's a campUUID
