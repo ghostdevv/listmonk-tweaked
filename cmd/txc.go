@@ -95,12 +95,16 @@ func handleSendTxcMessage(c echo.Context) error {
 		UnsubscribeURL: unsubscribeURL,
 		Subscriber:     sub,
 		Campaign: models.TxcRenderDataCampaign{
-			UUID: list.UUID,
-			// todo pub & priv list?
+			UUID:      list.UUID,
 			Name:      list.Name,
 			Subject:   tpl.Subject,
 			FromEmail: app.constants.FromEmail,
 		},
+	}
+
+	//? If the list is private don't show the name
+	if list.Type == models.ListTypePrivate {
+		txcRenderData.Campaign.Name = "list"
 	}
 
 	//? Render message template
