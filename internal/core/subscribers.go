@@ -357,30 +357,11 @@ func (c *Core) UpdateSubscriberWithLists(id int, sub models.Subscriber, listIDs 
 		}
 	}
 
-	//? Figure out the new lists
+	//? Get new lists for webhook
 
-	currentLists, err := c.GetSubscriberLists(id, "", []int{}, []string{}, "", "")
+	newListIDs, err := c.filterSubscriberNewLists(id, listIDs)
 	if err != nil {
-		return models.Subscriber{}, false, echo.NewHTTPError(http.StatusInternalServerError,
-			c.i18n.Ts("globals.messages.errorUpdating",
-				"name", "{globals.terms.subscriber}", "error", err.Error()))
-	}
-
-	newListIDs := []int{}
-
-	for _, newListID := range listIDs {
-		contains := true
-
-		for _, currentList := range currentLists {
-			if currentList.ID == newListID {
-				contains = false
-				break
-			}
-		}
-
-		if contains {
-			newListIDs = append(newListIDs, newListID)
-		}
+		return models.Subscriber{}, false, err
 	}
 
 	//? Update user
@@ -539,4 +520,30 @@ func (c *Core) DeleteBlocklistedSubscribers() (int, error) {
 
 	n, _ := res.RowsAffected()
 	return int(n), nil
+}
+
+func (c *Core) filterSubscriberNewLists(subID int, listIDs []int) ([]int, error) {
+	currentLists, err := c.GetSubscriberLists(subID, "", []int{}, []string{}, "", "")
+	if err != nil {
+		return nil, err
+	}
+
+	newListIDs := []int{}
+
+	for _, newListID := range listIDs {
+		contains := true
+
+		for _, currentList := range currentLists {
+			if currentList.ID == newListID {
+				contains = false
+				break
+			}
+		}
+
+		if contains {
+			newListIDs = append(newListIDs, newListID)
+		}
+	}
+
+	return newListIDs, nil
 }

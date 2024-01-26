@@ -24,6 +24,17 @@ func (c *Core) GetSubscriptions(subID int, subUUID string, allLists bool) ([]mod
 
 // AddSubscriptions adds list subscriptions to subscribers.
 func (c *Core) AddSubscriptions(subIDs, listIDs []int, status string) error {
+	for _, subID := range subIDs {
+		newListIDs, err := c.filterSubscriberNewLists(subID, listIDs)
+		if err != nil {
+			return err
+		}
+
+		if err := c.h.SendNewSubscriberWebhook(subID, newListIDs); err != nil {
+			c.log.Printf("error sending new subscriber webhook: %v", err)
+		}
+	}
+
 	if _, err := c.q.AddSubscribersToLists.Exec(pq.Array(subIDs), pq.Array(listIDs), status); err != nil {
 		c.log.Printf("error adding subscriptions: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -39,6 +50,8 @@ func (c *Core) AddSubscriptionsByQuery(query string, sourceListIDs, targetListID
 	if sourceListIDs == nil {
 		sourceListIDs = []int{}
 	}
+
+	// todo webhooks?
 
 	err := c.q.ExecSubQueryTpl(sanitizeSQLExp(query), c.q.AddSubscribersToListsByQuery, sourceListIDs, c.db, pq.Array(targetListIDs), status)
 	if err != nil {
