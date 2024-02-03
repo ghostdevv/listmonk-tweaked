@@ -1,55 +1,37 @@
-<a href="https://zerodha.tech"><img src="https://zerodha.tech/static/images/github-badge.svg" align="right" /></a>
+# Listmonk Tweaked
 
-[![listmonk-logo](https://user-images.githubusercontent.com/547147/231084896-835dba66-2dfe-497c-ba0f-787564c0819e.png)](https://listmonk.app)
+This is a fork of [listmonk](https://github.com/knadh/listmonk).
 
-listmonk is a standalone, self-hosted, newsletter and mailing list manager. It is fast, feature-rich, and packed into a single binary. It uses a PostgreSQL (⩾ 12) database as its data store.
+## Intentions/Motivations
 
-[![listmonk-dashboard](https://user-images.githubusercontent.com/547147/134939475-e0391111-f762-44cb-b056-6cb0857755e3.png)](https://listmonk.app)
+We needed a few features such as "drip campaigns" for a project and had major issues running other open source listmonk alternatives that had these features. I intend to keep this project alive until listmonk has the features we need or I find a suitable alternative. I don't intend to maintain this beyond our own internal needs due to time constraints/my lack of knowledge of go.
 
-Visit [listmonk.app](https://listmonk.app) for more info. Check out the [**live demo**](https://demo.listmonk.app).
+## Changes
 
-## Installation
+### `/api/txc`
 
-### Docker
+An endpoint for sending marketing emails without having to have an attached campaign. It works by using a [transactional template](https://listmonk.app/docs/templating/#transactional-templates) which must be written in markdown when sent with txc endpoint, combining the template contents with the default campaign template and then sending it to the user. It supports *most* of the [template expressions](https://listmonk.app/docs/templating/#template-expressions) available in a campaign template.
 
-The latest image is available on DockerHub at [`listmonk/listmonk:latest`](https://hub.docker.com/r/listmonk/listmonk/tags?page=1&ordering=last_updated&name=latest). Use the sample [docker-compose.yml](https://github.com/knadh/listmonk/blob/master/docker-compose.yml) to run manually or use the helper script. 
+```
+POST <host>/api/txc
 
-#### Demo
-
-```bash
-mkdir listmonk-demo && cd listmonk-demo
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-demo.sh)"
+{
+    "list_id": 3,
+    "subscriber_id": 3,
+    "template_id": 8
+}
 ```
 
-DO NOT use this demo setup in production.
+### New Subscriber Webhooks
 
-#### Production
+Webhooks that are sent when a user is added to the list for the first time (i.e. they get added to the list, this means if you remove them and then re-add them it will trigger the webhook). We use this with [n8n](https://n8n.io/) to and the txc endpoint mentioned above to send drip/automated campaigns (without an actual listmonk campaign attached) to users.
 
-```bash
-mkdir listmonk && cd listmonk
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-prod.sh)"
-```
-Visit `http://localhost:9000`.
+### Unsubscribe Page
 
-**NOTE**: Always examine the contents of shell scripts before executing them.
+I've tweaked the unsubscribe page to allow passing in a list uuid or a campaign uuid, this is so that emails you send with the txc endpoint can still have a fully functioning unsubscribe system. It'll also try it's best to find the list/campaign title and add it under `{{ .Data.ListTitle }}`.
 
-See [installation docs](https://listmonk.app/docs/installation).
+### Misc
 
-__________________
-
-### Binary
-- Download the [latest release](https://github.com/knadh/listmonk/releases) and extract the listmonk binary.
-- `./listmonk --new-config` to generate config.toml. Then, edit the file.
-- `./listmonk --install` to setup the Postgres DB (or `--upgrade` to upgrade an existing DB. Upgrades are idempotent and running them multiple times have no side effects).
-- Run `./listmonk` and visit `http://localhost:9000`.
-
-See [installation docs](https://listmonk.app/docs/installation).
-__________________
-
-
-## Developers
-listmonk is a free and open source software licensed under AGPLv3. If you are interested in contributing, refer to the [developer setup](https://listmonk.app/docs/developer-setup). The backend is written in Go and the frontend is Vue with Buefy for UI. 
-
-
-## License
-listmonk is licensed under the AGPL v3 license.
+- I've replaced the frontend package manager with [pnpm](https://pnpm.io/) because I couldn't get yarn to run.
+- I'm publishing a docker image to `ghcr.io/ghostdevv/listmonk-tweaked`
+- For places that I've mad show/have a list name, if that list is private then it'll add something like "list" as the name.
