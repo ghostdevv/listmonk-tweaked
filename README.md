@@ -26,6 +26,27 @@ POST <host>/api/txc
 
 Webhooks that are sent when a user is added to the list for the first time (i.e. they get added to the list, this means if you remove them and then re-add them it will trigger the webhook). We use this with [n8n](https://n8n.io/) to and the txc endpoint mentioned above to send drip/automated campaigns (without an actual listmonk campaign attached) to users.
 
+You can use this by adding the following to your listmonk `config.toml`:
+
+```toml
+[tweaks]
+list_webhooks = [
+    { list_id = LIST_ID, url = "WEBHOOK_URL" },
+]
+```
+
+- `LIST_ID` is the int id of your list, **NOT** the uuid.
+- `WEBHOOK_URL` is the webhook endpoint to `POST` to
+
+It'll send the following JSON body to your webhook:
+
+```json
+{
+    "subscriberId": 7,
+    "listId": 3
+}
+```
+
 ### Unsubscribe Page
 
 I've tweaked the unsubscribe page to allow passing in a list uuid or a campaign uuid, this is so that emails you send with the txc endpoint can still have a fully functioning unsubscribe system. It'll also try it's best to find the list/campaign title and add it under `{{ .Data.ListTitle }}`.
