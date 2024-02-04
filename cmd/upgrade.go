@@ -5,9 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ghostdevv/listmonk-tweaked/internal/migrations"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/listmonk/internal/migrations"
 	"github.com/knadh/stuffbin"
 	"github.com/lib/pq"
 	"golang.org/x/mod/semver"

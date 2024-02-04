@@ -11,9 +11,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/ghostdevv/listmonk-tweaked/internal/i18n"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/jmoiron/sqlx"
-	"github.com/knadh/listmonk/internal/i18n"
-	"github.com/knadh/listmonk/models"
 	"github.com/lib/pq"
 )
 

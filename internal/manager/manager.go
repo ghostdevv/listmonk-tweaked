@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/knadh/listmonk/internal/i18n"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/i18n"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 )
 
 const (

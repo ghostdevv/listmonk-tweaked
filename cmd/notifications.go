@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 )
 
 const (

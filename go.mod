@@ -1,4 +1,4 @@
-module github.com/knadh/listmonk
+module github.com/ghostdevv/listmonk-tweaked
 
 go 1.20
 

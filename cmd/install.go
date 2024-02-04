@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/gofrs/uuid/v5"
 	"github.com/jmoiron/sqlx"
-	"github.com/knadh/listmonk/models"
 	"github.com/knadh/stuffbin"
 	"github.com/lib/pq"
 )

@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knadh/listmonk/internal/subimporter"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/subimporter"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/labstack/echo/v4"
 )
 

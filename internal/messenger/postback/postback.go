@@ -9,7 +9,7 @@ import (
 	"net/textproto"
 	"time"
 
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 )
 
 // postback is the payload that's posted as JSON to the HTTP Postback server.

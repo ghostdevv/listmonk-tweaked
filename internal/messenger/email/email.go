@@ -7,7 +7,7 @@ import (
 	"net/smtp"
 	"net/textproto"
 
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/knadh/smtppool"
 )
 

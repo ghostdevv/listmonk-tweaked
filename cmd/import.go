@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"os"
 	"net/http"
+	"os"
 	"strings"
 
-	"github.com/knadh/listmonk/internal/subimporter"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/subimporter"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/labstack/echo/v4"
 )
 

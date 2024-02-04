@@ -12,13 +12,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/gdgvda/cron"
+	"github.com/ghostdevv/listmonk-tweaked/internal/messenger/email"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/gofrs/uuid/v5"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/listmonk/internal/messenger/email"
-	"github.com/knadh/listmonk/models"
 	"github.com/labstack/echo/v4"
 )
 

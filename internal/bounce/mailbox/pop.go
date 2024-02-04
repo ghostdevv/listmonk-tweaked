@@ -9,8 +9,8 @@ import (
 
 	"github.com/emersion/go-message"
 	_ "github.com/emersion/go-message/charset"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/knadh/go-pop3"
-	"github.com/knadh/listmonk/models"
 )
 
 // POP represents a POP mailbox.

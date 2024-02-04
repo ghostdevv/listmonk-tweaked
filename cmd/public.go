@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knadh/listmonk/internal/i18n"
-	"github.com/knadh/listmonk/internal/manager"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/i18n"
+	"github.com/ghostdevv/listmonk-tweaked/internal/manager"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
 )
