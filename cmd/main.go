@@ -191,6 +191,7 @@ func main() {
 	cOpt := &core.Opt{
 		Constants: core.Constants{
 			SendOptinConfirmation: app.constants.SendOptinConfirmation,
+			CacheSlowQueries:      ko.Bool("app.cache_slow_queries"),
 		},
 		Queries: queries,
 		DB:      db,
@@ -209,7 +210,7 @@ func main() {
 
 	app.queries = queries
 	app.manager = initCampaignManager(app.queries, app.constants, app)
-	app.importer = initImporter(app.queries, db, app)
+	app.importer = initImporter(app.queries, db, app.core, app)
 	app.notifTpls = initNotifTemplates("/email-templates/*.html", fs, app.i18n, app.constants)
 	initTxTemplates(app.manager, app)
 
@@ -233,6 +234,11 @@ func main() {
 
 	// Load system information.
 	app.about = initAbout(queries, db)
+
+	// Start cronjobs.
+	if cOpt.Constants.CacheSlowQueries {
+		initCron(app.core)
+	}
 
 	// Start the campaign workers. The campaign batches (fetch from DB, push out
 	// messages) get processed at the specified interval.
