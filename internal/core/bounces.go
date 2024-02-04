@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
 )
@@ -59,7 +59,7 @@ func (c *Core) GetBounce(id int) (models.Bounce, error) {
 
 // RecordBounce records a new bounce.
 func (c *Core) RecordBounce(b models.Bounce) error {
-	action, ok := c.constants.BounceActions[b.Type]
+	action, ok := c.consts.BounceActions[b.Type]
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, c.i18n.Ts("globals.messages.invalidData")+": "+b.Type)
 	}

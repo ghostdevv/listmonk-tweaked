@@ -80,6 +80,7 @@
         header-class="cy-subscribers" numeric sortable centered>
         <router-link :to="`/subscribers/lists/${props.row.id}`">
           {{ $utils.formatNumber(props.row.subscriberCount) }}
+          <span class="is-size-7 view">{{ $t('globals.buttons.view') }}</span>
         </router-link>
       </b-table-column>
 
@@ -142,6 +143,14 @@
     <b-modal scroll="keep" :aria-modal="true" :active.sync="isFormVisible" :width="600" @close="onFormClose">
       <list-form :data="curItem" :is-editing="isEditing" @finished="formFinished" />
     </b-modal>
+
+    <p v-if="settings['app.cache_slow_queries']" class="has-text-grey">
+      *{{ $t('globals.messages.slowQueriesCached') }}
+      <a href="https://listmonk.app/maintenance/performance/" target="_blank" rel="noopener noreferer"
+        class="has-text-grey">
+        <b-icon icon="link-variant" /> {{ $t('globals.buttons.learnMore') }}
+      </a>
+    </p>
   </section>
 </template>
 

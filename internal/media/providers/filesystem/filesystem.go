@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/knadh/listmonk/internal/media"
+	"github.com/ghostdevv/listmonk-tweaked/internal/media"
 )
 
 const tmpFilePrefix = "listmonk"

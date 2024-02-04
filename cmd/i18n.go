@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/knadh/listmonk/internal/i18n"
+	"github.com/ghostdevv/listmonk-tweaked/internal/i18n"
 	"github.com/knadh/stuffbin"
 	"github.com/labstack/echo/v4"
 )

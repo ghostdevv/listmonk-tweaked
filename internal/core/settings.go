@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/jmoiron/sqlx/types"
-	"github.com/knadh/listmonk/models"
 	"github.com/labstack/echo/v4"
 )
 

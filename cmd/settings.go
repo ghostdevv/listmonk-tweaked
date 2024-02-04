@@ -11,13 +11,14 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/gofrs/uuid"
+	"github.com/gdgvda/cron"
+	"github.com/ghostdevv/listmonk-tweaked/internal/messenger/email"
+	"github.com/ghostdevv/listmonk-tweaked/models"
+	"github.com/gofrs/uuid/v5"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/listmonk/internal/messenger/email"
-	"github.com/knadh/listmonk/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -207,6 +208,13 @@ func handleUpdateSettings(c echo.Context) error {
 	}
 	set.DomainBlocklist = doms
 
+	// Validate slow query caching cron.
+	if set.CacheSlowQueries {
+		if _, err := cron.ParseStandard(set.CacheSlowQueriesInterval); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, app.i18n.Ts("globals.messages.invalidData")+": slow query cron: "+err.Error())
+		}
+	}
+
 	// Update the settings in the DB.
 	if err := app.core.UpdateSettings(set); err != nil {
 		return err
@@ -291,7 +299,6 @@ func handleTestSMTPSettings(c echo.Context) error {
 	m.Subject = app.i18n.T("settings.smtp.testConnection")
 	m.Body = b.Bytes()
 	if err := msgr.Push(m); err != nil {
-		app.log.Printf("error sending SMTP test (%s): %v", m.Subject, err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

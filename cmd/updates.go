@@ -10,7 +10,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-const updateCheckURL = "https://api.github.com/repos/knadh/listmonk/releases/latest"
+const updateCheckURL = "https://api.github.com/repos/ghostdevv/listmonk-tweaked/releases/latest"
 
 type remoteUpdateResp struct {
 	Version string `json:"tag_name"`

@@ -8,8 +8,8 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/knadh/listmonk/internal/manager"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/manager"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/labstack/echo/v4"
 )
 

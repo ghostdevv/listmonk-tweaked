@@ -3,11 +3,11 @@ package main
 import (
 	"net/http"
 
-	"github.com/gofrs/uuid"
-	"github.com/knadh/listmonk/internal/core"
-	"github.com/knadh/listmonk/internal/manager"
-	"github.com/knadh/listmonk/internal/media"
-	"github.com/knadh/listmonk/models"
+	"github.com/ghostdevv/listmonk-tweaked/internal/core"
+	"github.com/ghostdevv/listmonk-tweaked/internal/manager"
+	"github.com/ghostdevv/listmonk-tweaked/internal/media"
+	"github.com/ghostdevv/listmonk-tweaked/models"
+	"github.com/gofrs/uuid/v5"
 	"github.com/lib/pq"
 )
 

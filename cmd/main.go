@@ -12,19 +12,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ghostdevv/listmonk-tweaked/internal/bounce"
+	"github.com/ghostdevv/listmonk-tweaked/internal/buflog"
+	"github.com/ghostdevv/listmonk-tweaked/internal/captcha"
+	"github.com/ghostdevv/listmonk-tweaked/internal/core"
+	"github.com/ghostdevv/listmonk-tweaked/internal/events"
+	"github.com/ghostdevv/listmonk-tweaked/internal/i18n"
+	"github.com/ghostdevv/listmonk-tweaked/internal/manager"
+	"github.com/ghostdevv/listmonk-tweaked/internal/media"
+	"github.com/ghostdevv/listmonk-tweaked/internal/subimporter"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/listmonk/internal/bounce"
-	"github.com/knadh/listmonk/internal/buflog"
-	"github.com/knadh/listmonk/internal/captcha"
-	"github.com/knadh/listmonk/internal/core"
-	"github.com/knadh/listmonk/internal/events"
-	"github.com/knadh/listmonk/internal/i18n"
-	"github.com/knadh/listmonk/internal/manager"
-	"github.com/knadh/listmonk/internal/media"
-	"github.com/knadh/listmonk/internal/subimporter"
-	"github.com/knadh/listmonk/models"
 	"github.com/knadh/paginator"
 	"github.com/knadh/stuffbin"
 )
@@ -191,6 +191,7 @@ func main() {
 	cOpt := &core.Opt{
 		Constants: core.Constants{
 			SendOptinConfirmation: app.constants.SendOptinConfirmation,
+			CacheSlowQueries:      ko.Bool("app.cache_slow_queries"),
 		},
 		Queries: queries,
 		DB:      db,
@@ -209,7 +210,7 @@ func main() {
 
 	app.queries = queries
 	app.manager = initCampaignManager(app.queries, app.constants, app)
-	app.importer = initImporter(app.queries, db, app)
+	app.importer = initImporter(app.queries, db, app.core, app)
 	app.notifTpls = initNotifTemplates("/email-templates/*.html", fs, app.i18n, app.constants)
 	initTxTemplates(app.manager, app)
 
@@ -233,6 +234,11 @@ func main() {
 
 	// Load system information.
 	app.about = initAbout(queries, db)
+
+	// Start cronjobs.
+	if cOpt.Constants.CacheSlowQueries {
+		initCron(app.core)
+	}
 
 	// Start the campaign workers. The campaign batches (fetch from DB, push out
 	// messages) get processed at the specified interval.

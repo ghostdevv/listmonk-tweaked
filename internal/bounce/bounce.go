@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/ghostdevv/listmonk-tweaked/internal/bounce/mailbox"
+	"github.com/ghostdevv/listmonk-tweaked/internal/bounce/webhooks"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/jmoiron/sqlx"
-	"github.com/knadh/listmonk/internal/bounce/mailbox"
-	"github.com/knadh/listmonk/internal/bounce/webhooks"
-	"github.com/knadh/listmonk/models"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knadh/listmonk/internal/media"
+	"github.com/ghostdevv/listmonk-tweaked/internal/media"
 	"github.com/rhnvrm/simples3"
 )
 

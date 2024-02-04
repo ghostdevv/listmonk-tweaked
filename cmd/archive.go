@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/ghostdevv/listmonk-tweaked/internal/manager"
+	"github.com/ghostdevv/listmonk-tweaked/models"
 	"github.com/gorilla/feeds"
-	"github.com/knadh/listmonk/internal/manager"
-	"github.com/knadh/listmonk/models"
 	"github.com/labstack/echo/v4"
 	null "gopkg.in/volatiletech/null.v6"
 )
