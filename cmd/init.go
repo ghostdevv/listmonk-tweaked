@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -478,6 +480,7 @@ func initCampaignManager(q *models.Queries, cs *constants, app *App) *manager.Ma
 		ViewTrackURL:          cs.ViewTrackURL,
 		MessageURL:            cs.MessageURL,
 		ArchiveURL:            cs.ArchiveURL,
+		RootURL:               cs.RootURL,
 		UnsubHeader:           ko.Bool("privacy.unsubscribe_header"),
 		SlidingWindow:         ko.Bool("app.message_sliding_window"),
 		SlidingWindowDuration: ko.Duration("app.message_sliding_window_duration"),
@@ -800,7 +803,7 @@ func initHTTPServer(app *App) *echo.Echo {
 	// Start the server.
 	go func() {
 		if err := srv.Start(ko.String("app.address")); err != nil {
-			if strings.Contains(err.Error(), "Server closed") {
+			if errors.Is(err, http.ErrServerClosed) {
 				lo.Println("HTTP server shut down")
 			} else {
 				lo.Fatalf("error starting HTTP server: %v", err)
