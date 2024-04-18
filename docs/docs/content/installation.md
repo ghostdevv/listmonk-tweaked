@@ -5,7 +5,7 @@ listmonk requires Postgres ⩾ 12.
 See the "[Tutorials](#tutorials)" section at the bottom for detailed guides. 
 
 ## Binary
-- Download the [latest release](https://github.com/knadh/listmonk/releases) and extract the listmonk binary.
+- Download the [latest release](https://github.com/knadh/listmonk/releases) and extract the listmonk binary. `amd64` is the main one. It works for Intel and x86 CPUs.
 - `./listmonk --new-config` to generate config.toml. Then, edit the file.
 - `./listmonk --install` to install the tables in the Postgres DB.
 - Run `./listmonk` and visit `http://localhost:9000`.
@@ -26,7 +26,7 @@ Use the sample [docker-compose.yml](https://github.com/knadh/listmonk/blob/maste
 
 ```bash
 mkdir listmonk-demo && cd listmonk-demo
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-demo.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-demo.sh)"
 ```
 
 #### Manual Docker install
@@ -47,7 +47,7 @@ This setup is recommended if you want to _quickly_ setup `listmonk` in productio
 
 ```bash
 mkdir listmonk && cd listmonk
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-prod.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/knadh/listmonk/master/install-prod.sh)"
 ```
 
 The above shell script performs the following actions:
